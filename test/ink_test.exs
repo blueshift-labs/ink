@@ -23,13 +23,15 @@ defmodule InkTest do
     assert_receive {:io_request, _, _, {:put_chars, :unicode, msg}}
 
     assert %{
-             "name" => "ink",
-             "hostname" => hostname,
-             "pid" => pid,
              "msg" => "test",
              "time" => timestamp,
              "level" => 30,
-             "v" => 0
+             "metadata" => %{
+               "name" => "ink",
+               "hostname" => hostname,
+               "pid" => pid,
+               "v" => 0
+             }
            } = Jason.decode!(msg)
 
     assert is_binary(hostname)
@@ -46,6 +48,7 @@ defmodule InkTest do
     assert "testwithlist" == decoded_msg["msg"]
   end
 
+  @tag :force
   test "it includes an ISO 8601 timestamp" do
     Logger.info("test")
 
@@ -61,11 +64,11 @@ defmodule InkTest do
 
     assert_receive {:io_request, _, _, {:put_chars, :unicode, msg}}
     decoded_msg = Jason.decode!(msg)
-    assert 1 == decoded_msg["not_included"]
-    assert 1 == decoded_msg["included"]
+    assert 1 == decoded_msg["metadata"]["not_included"]
+    assert 1 == decoded_msg["metadata"]["included"]
 
     assert "test it logs all metadata if not configured/1" ==
-             decoded_msg["function"]
+             decoded_msg["metadata"]["function"]
   end
 
   test "it only includes configured metadata" do
@@ -75,8 +78,8 @@ defmodule InkTest do
 
     assert_receive {:io_request, _, _, {:put_chars, :unicode, msg}}
     decoded_msg = Jason.decode!(msg)
-    assert nil == decoded_msg["not_included"]
-    assert 1 == decoded_msg["included"]
+    assert nil == decoded_msg["metadata"]["not_included"]
+    assert 1 == decoded_msg["metadata"]["included"]
   end
 
   test "it puts the erlang process pid into erlang_pid" do
@@ -84,7 +87,7 @@ defmodule InkTest do
 
     assert_receive {:io_request, _, _, {:put_chars, :unicode, msg}}
     decoded_msg = Jason.decode!(msg)
-    assert inspect(self()) == decoded_msg["erlang_pid"]
+    assert inspect(self()) == decoded_msg["metadata"]["erlang_pid"]
   end
 
   test "respects log level" do
@@ -151,7 +154,9 @@ defmodule InkTest do
     Logger.info("test")
 
     assert_receive {:io_request, _, _, {:put_chars, :unicode, msg}}
-    assert msg |> Jason.decode!() |> Map.get("hostname", :excluded) == :excluded
+
+    assert Jason.decode!(msg)["metadata"] |> Map.get("hostname", :excluded) ==
+             :excluded
   end
 
   test "respects log_encoding_error: true" do

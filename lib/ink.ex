@@ -258,6 +258,8 @@ defmodule Ink do
     end
   end
 
+  defp level(level, nil), do: level
+
   defp hostname do
     with {:ok, hostname} <- :inet.gethostname(), do: List.to_string(hostname)
   end

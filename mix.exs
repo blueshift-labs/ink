@@ -43,7 +43,7 @@ defmodule Ink.Mixfile do
 
   defp deps do
     [
-      {:jason, "~> 1.1"},
+      {:jason, "~> 1.2.2"},
       {:inch_ex, "~> 2.0", only: :docs},
       {:credo, "~> 1.0", only: [:dev, :test]},
       {:ex_doc, ">= 0.0.0", only: :dev, runtime: false}
