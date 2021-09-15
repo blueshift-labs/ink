@@ -28,14 +28,11 @@ defmodule InkTest do
              "level" => 30,
              "metadata" => %{
                "name" => "ink",
-               "hostname" => hostname,
-               "pid" => pid
+               "hostname" => hostname
              }
            } = Jason.decode!(msg)
 
     assert is_binary(hostname)
-    assert is_integer(pid)
-
     assert {:ok, _} = NaiveDateTime.from_iso8601(timestamp)
   end
 
@@ -79,14 +76,6 @@ defmodule InkTest do
     decoded_msg = Jason.decode!(msg)
     assert nil == decoded_msg["metadata"]["not_included"]
     assert 1 == decoded_msg["metadata"]["included"]
-  end
-
-  test "it puts the erlang process pid into erlang_pid" do
-    Logger.info("test")
-
-    assert_receive {:io_request, _, _, {:put_chars, :unicode, msg}}
-    decoded_msg = Jason.decode!(msg)
-    assert inspect(self()) == decoded_msg["metadata"]["erlang_pid"]
   end
 
   test "respects log level" do

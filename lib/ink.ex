@@ -132,7 +132,6 @@ defmodule Ink do
   defp process_metadata(metadata, config) do
     metadata
     |> filter_metadata(config)
-    |> rename_metadata_fields
     |> Enum.into(%{})
     |> Map.delete(:time)
   end
@@ -141,14 +140,6 @@ defmodule Ink do
 
   defp filter_metadata(metadata, config) do
     metadata |> Enum.filter(fn {key, _} -> key in config.metadata end)
-  end
-
-  defp rename_metadata_fields(metadata) do
-    metadata
-    |> Enum.map(fn
-      {:pid, value} -> {:erlang_pid, value}
-      other -> other
-    end)
   end
 
   defp log_json({:ok, json}, config) do
@@ -170,7 +161,6 @@ defmodule Ink do
        when is_binary(message) do
     %{
       name: name(),
-      pid: System.get_pid() |> String.to_integer(),
       msg: message,
       time: formatted_timestamp(timestamp),
       level: level(level, config.status_mapping)
@@ -180,7 +170,6 @@ defmodule Ink do
   defp base_map(message, timestamp, level, config) when is_binary(message) do
     %{
       name: name(),
-      pid: System.get_pid() |> String.to_integer(),
       hostname: hostname(),
       msg: message,
       time: formatted_timestamp(timestamp),
