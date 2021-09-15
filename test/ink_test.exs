@@ -29,8 +29,7 @@ defmodule InkTest do
              "metadata" => %{
                "name" => "ink",
                "hostname" => hostname,
-               "pid" => pid,
-               "v" => 0
+               "pid" => pid
              }
            } = Jason.decode!(msg)
 
