@@ -27,6 +27,7 @@ defmodule Ink do
   (default: `[]`)
   - `:metadata` the metadata keys that should be included in the logs (default:
   all)
+  - `:flatten_metadata` move all metadata to the top level (default: false)
   - `:exclude_hostname` exclude local `hostname` from the log (default:
   false)
   - `:log_encoding_error` whether to log errors that happen during JSON encoding
@@ -124,7 +125,7 @@ defmodule Ink do
       message
       |> base_map(timestamp, level, config)
       |> Map.merge(process_metadata(metadata, config))
-      |> Ink.Encoder.encode()
+      |> Ink.Encoder.encode(config)
       |> log_json(config)
     end
   end
@@ -220,6 +221,7 @@ defmodule Ink do
       secret_strings: [],
       io_device: :stdio,
       metadata: nil,
+      flatten_metadata: false,
       exclude_hostname: false,
       log_encoding_error: true
     }

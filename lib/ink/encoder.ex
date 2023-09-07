@@ -16,7 +16,15 @@ defmodule Ink.Encoder do
   Accepts a map and recursively replaces all JSON incompatible values with JSON
   encodable values. Then converts the map to JSON.
   """
-  def encode(map) do
+  def encode(map, config \\ %{})
+
+  def encode(map, %{flatten_metadata: true}) do
+    map
+    |> encode_value()
+    |> Jason.encode()
+  end
+
+  def encode(map, _config) do
     value = encode_value(map)
 
     %Record{
@@ -28,26 +36,26 @@ defmodule Ink.Encoder do
     |> Jason.encode()
   end
 
-  def encode_value(value)
-      when is_pid(value) or is_port(value) or is_reference(value) or
-             is_tuple(value) or is_function(value),
-      do: inspect(value)
+  defp encode_value(value)
+       when is_pid(value) or is_port(value) or is_reference(value) or
+              is_tuple(value) or is_function(value),
+       do: inspect(value)
 
-  def encode_value(%{__struct__: _} = value) do
+  defp encode_value(%{__struct__: _} = value) do
     value
     |> Map.from_struct()
     |> encode_value
   end
 
-  def encode_value(value) when is_map(value) do
+  defp encode_value(value) when is_map(value) do
     Enum.into(value, %{}, fn {k, v} ->
       {encode_value(k), encode_value(v)}
     end)
   end
 
-  def encode_value([]), do: []
+  defp encode_value([]), do: []
 
-  def encode_value(value) when is_list(value) do
+  defp encode_value(value) when is_list(value) do
     cond do
       Keyword.keyword?(value) ->
         value
@@ -59,5 +67,5 @@ defmodule Ink.Encoder do
     end
   end
 
-  def encode_value(value), do: value
+  defp encode_value(value), do: value
 end
