@@ -158,23 +158,31 @@ defmodule Ink do
 
   defp log_to_device(msg, io_device), do: IO.puts(io_device, msg)
 
-  defp base_map(message, timestamp, level, %{exclude_hostname: true} = config)
+  defp base_map(
+         message,
+         timestamp,
+         level,
+         %{exclude_hostname: true, base_map: base_map} = config
+       )
        when is_binary(message) do
     %{
-      name: name(),
-      msg: message,
-      time: formatted_timestamp(timestamp),
-      level: level(level, config.status_mapping)
+      Keyword.get(base_map, :name, :name) => name(),
+      Keyword.get(base_map, :msg, :msg) => message,
+      Keyword.get(base_map, :time, :time) => formatted_timestamp(timestamp),
+      Keyword.get(base_map, :level, :level) =>
+        level(level, config.status_mapping)
     }
   end
 
-  defp base_map(message, timestamp, level, config) when is_binary(message) do
+  defp base_map(message, timestamp, level, %{base_map: base_map} = config)
+       when is_binary(message) do
     %{
-      name: name(),
-      hostname: hostname(),
-      msg: message,
-      time: formatted_timestamp(timestamp),
-      level: level(level, config.status_mapping)
+      Keyword.get(base_map, :name, :name) => name(),
+      Keyword.get(base_map, :hostname, :hostname) => hostname(),
+      Keyword.get(base_map, :msg, :msg) => message,
+      Keyword.get(base_map, :time, :time) => formatted_timestamp(timestamp),
+      Keyword.get(base_map, :level, :level) =>
+        level(level, config.status_mapping)
     }
   end
 
@@ -223,7 +231,8 @@ defmodule Ink do
       metadata: nil,
       flatten_metadata: false,
       exclude_hostname: false,
-      log_encoding_error: true
+      log_encoding_error: true,
+      base_map: []
     }
   end
 
